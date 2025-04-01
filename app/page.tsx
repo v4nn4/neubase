@@ -4,14 +4,8 @@ import { useEffect, useState } from "react";
 import { Calendar } from "@/components/Calendar";
 import { BookingModal } from "@/components/BookingModal";
 import Image from "next/image";
-import { eachDayOfInterval } from "date-fns";
 import { Slot } from "@/lib/types";
-
-// Vacation days: April 13–24
-const UNAVAILABLE_RANGE = eachDayOfInterval({
-  start: new Date("2025-04-13"),
-  end: new Date("2025-04-24"),
-});
+import { ALL_VACATIONS } from "@/lib/vacations";
 
 export default function Home() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -65,7 +59,7 @@ export default function Home() {
             Come work from <s>home</s> Neubau!
           </p>
           <Calendar
-            disabledDays={[...UNAVAILABLE_RANGE]}
+            disabledDays={[...ALL_VACATIONS]}
             bookedDays={bookedDays}
             lowAvailabilityDays={lowAvailabilityDays}
             onSelect={(date) => {
