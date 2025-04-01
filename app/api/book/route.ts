@@ -1,21 +1,58 @@
-import { bookDate } from "@/lib/booking";
+import { bookDate, canBookDate } from "@/lib/bookings";
+import nodemailer from "nodemailer";
+import { format } from "date-fns";
 
-export async function POST(req: Request) {
-  const { date, name, email } = await req.json();
-  if (!date || !name || !email) {
-    return Response.json(
-      { success: false, error: "Missing required fields" },
-      { status: 400 }
-    );
-  }
+const transporter = nodemailer.createTransport({
+  host: "mail.privateemail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.NAMECHEAP_USERNAME,
+    pass: process.env.NAMECHEAP_PASSWORD,
+  },
+});
 
+export async function POST(request: Request) {
   try {
-    bookDate(date, name, email);
+    const { name, email, comment, date } = await request.json();
+
+    if (!name || !email || !date) {
+      return Response.json(
+        { success: false, error: "Missing required fields." },
+        { status: 400 }
+      );
+    }
+
+    const formatted = format(new Date(date), "yyyy-MM-dd");
+
+    if (!canBookDate(formatted)) {
+      return Response.json(
+        { success: false, error: "This date is fully booked." },
+        { status: 400 }
+      );
+    }
+
+    // Save booking
+    bookDate(formatted, name, email, comment);
+
+    // Email content
+    const mailOptions = {
+      from: process.env.NAMECHEAP_USERNAME,
+      to: process.env.NAMECHEAP_USERNAME,
+      subject: `New Neubase Booking: ${formatted}`,
+      text: `New booking for ${formatted}:\n\nName: ${name}\nEmail: ${email}\nComment: ${
+        comment || "—"
+      }`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
     return Response.json({ success: true });
-  } catch (err) {
+  } catch (error) {
+    console.error("Booking error:", error);
     return Response.json(
-      { success: false, error: (err as Error).message },
-      { status: 400 }
+      { success: false, error: "Server error." },
+      { status: 500 }
     );
   }
 }

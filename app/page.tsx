@@ -48,7 +48,7 @@ export default function Home() {
 
         {/* Right side: Title, Subtitle, Calendar */}
         <div className="w-full md:w-1/2 flex flex-col items-center md:items-start">
-          <h1 className="text-4xl font-bold mb-1 font-[var(--font-title)]">
+          <h1 className="text-4xl mb-1 font-[var(--font-title)]">
             The Neubase
           </h1>
           <p className="text-lg font-light mb-4">

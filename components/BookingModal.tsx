@@ -9,11 +9,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 
-import { getBookingsForDate } from "@/lib/booking"; // adjust path as needed
+import { getBookingsForDate } from "@/lib/booking";
 import { Callout } from "./Callout";
 
 type BookingModalProps = {
@@ -73,7 +72,7 @@ export function BookingModal({ date, onClose }: BookingModalProps) {
 
         {confirmed ? (
           <div className="text-green-600 font-medium">
-            ✅ Booking confirmed! We’ll see you then.
+            ✅ Booking confirmed! We'll see you then.
           </div>
         ) : (
           <form
