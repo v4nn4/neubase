@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       }`,
     };
 
-    //await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
 
     return NextResponse.json({ success: true });
   } catch (error) {
