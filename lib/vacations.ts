@@ -12,7 +12,7 @@ const STUTTGART_VACATION = eachDayOfInterval({
 
 const WEDDING_VACATION = eachDayOfInterval({
   start: new Date("2025-05-27"),
-  end: new Date("2025-05-06"),
+  end: new Date("2025-06-06"),
 });
 
 export const ALL_VACATIONS = [
