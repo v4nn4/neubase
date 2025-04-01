@@ -1,4 +1,4 @@
-import { bookDate, canBookDate } from "@/lib/bookings";
+import { bookDate, canBookDate } from "@/lib/booking";
 import nodemailer from "nodemailer";
 import { format } from "date-fns";
 
