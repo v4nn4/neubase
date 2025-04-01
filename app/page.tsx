@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Calendar } from "@/components/Calendar";
 import { BookingModal } from "@/components/BookingModal";
 import Image from "next/image";
 import { eachDayOfInterval } from "date-fns";
-import { getBookings } from "@/lib/booking";
+import { Slot } from "@/lib/types";
 
 // Vacation days: April 13–24
 const UNAVAILABLE_RANGE = eachDayOfInterval({
@@ -13,24 +13,34 @@ const UNAVAILABLE_RANGE = eachDayOfInterval({
   end: new Date("2025-04-24"),
 });
 
-const allBookings = getBookings(); // however you're fetching them
-
-const dateCountMap = new Map<string, number>();
-allBookings.forEach((b) => {
-  const key = b.date; // already a YYYY-MM-DD string
-  dateCountMap.set(key, (dateCountMap.get(key) || 0) + 1);
-});
-
-const lowAvailabilityDays = Array.from(dateCountMap.entries())
-  .filter(([, count]) => count === 1)
-  .map(([date]) => new Date(date));
-
-const bookedDays = Array.from(dateCountMap.entries())
-  .filter(([, count]) => count >= 2)
-  .map(([date]) => new Date(date));
-
 export default function Home() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [bookings, setBookings] = useState<Slot[]>([]);
+
+  useEffect(() => {
+    fetch("/api/book")
+      .then((res) => res.json())
+      .then((data) => setBookings(data));
+  }, []);
+
+  const refreshBookings = () => {
+    fetch("/api/book")
+      .then((res) => res.json())
+      .then((data) => setBookings(data));
+  };
+
+  const dateCountMap = new Map<string, number>();
+  bookings.forEach((b) => {
+    dateCountMap.set(b.date, (dateCountMap.get(b.date) || 0) + 1);
+  });
+
+  const lowAvailabilityDays = Array.from(dateCountMap.entries())
+    .filter(([, count]) => count === 1)
+    .map(([date]) => new Date(date));
+
+  const bookedDays = Array.from(dateCountMap.entries())
+    .filter(([, count]) => count >= 2)
+    .map(([date]) => new Date(date));
 
   return (
     <main className="max-w-5xl mx-auto py-10 px-4 lg:mt-30">
@@ -48,7 +58,7 @@ export default function Home() {
 
         {/* Right side: Title, Subtitle, Calendar */}
         <div className="w-full md:w-1/2 flex flex-col items-center md:items-start">
-          <h1 className="text-4xl mb-1 font-[var(--font-title)]">
+          <h1 className="text-4xl mb-1 font-bold font-[var(--font-title)]">
             The Neubase
           </h1>
           <p className="text-lg font-light mb-4">
@@ -68,7 +78,10 @@ export default function Home() {
       {selectedDate && (
         <BookingModal
           date={selectedDate}
-          onClose={() => setSelectedDate(null)}
+          onClose={() => {
+            setSelectedDate(null);
+            refreshBookings();
+          }}
         />
       )}
     </main>

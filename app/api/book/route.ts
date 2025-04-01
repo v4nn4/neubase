@@ -1,6 +1,6 @@
-import { bookDate, canBookDate } from "@/lib/booking";
+import { prisma } from "@/lib/db";
 import nodemailer from "nodemailer";
-import { format } from "date-fns";
+import { NextResponse } from "next/server";
 
 const transporter = nodemailer.createTransport({
   host: "mail.privateemail.com",
@@ -17,41 +17,66 @@ export async function POST(request: Request) {
     const { name, email, comment, date } = await request.json();
 
     if (!name || !email || !date) {
-      return Response.json(
+      return NextResponse.json(
         { success: false, error: "Missing required fields." },
         { status: 400 }
       );
     }
 
-    const formatted = format(new Date(date), "yyyy-MM-dd");
+    const formattedDate = new Date(date).toISOString().split("T")[0];
 
-    if (!canBookDate(formatted)) {
-      return Response.json(
+    const existing = await prisma.booking.count({
+      where: {
+        date: new Date(formattedDate),
+      },
+    });
+
+    if (existing >= 2) {
+      return NextResponse.json(
         { success: false, error: "This date is fully booked." },
         { status: 400 }
       );
     }
 
-    // Save booking
-    bookDate(formatted, name, email, comment);
+    await prisma.booking.create({
+      data: {
+        name,
+        email,
+        comment,
+        date: new Date(formattedDate),
+      },
+    });
 
     // Email content
     const mailOptions = {
       from: process.env.NAMECHEAP_USERNAME,
       to: process.env.NAMECHEAP_USERNAME,
-      subject: `New Neubase Booking: ${formatted}`,
-      text: `New booking for ${formatted}:\n\nName: ${name}\nEmail: ${email}\nComment: ${
+      subject: `New Neubase Booking: ${formattedDate}`,
+      text: `New booking for ${formattedDate}:\n\nName: ${name}\nEmail: ${email}\nComment: ${
         comment || "—"
       }`,
     };
 
-    await transporter.sendMail(mailOptions);
+    //await transporter.sendMail(mailOptions);
 
-    return Response.json({ success: true });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Booking error:", error);
-    return Response.json(
+    return NextResponse.json(
       { success: false, error: "Server error." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  try {
+    const bookings = await prisma.booking.findMany();
+    return NextResponse.json(bookings);
+  } catch (error) {
+    console.error("Failed to fetch bookings:", error);
+    return NextResponse.json(
+      { error: "Could not fetch bookings" },
       { status: 500 }
     );
   }

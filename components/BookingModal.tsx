@@ -12,7 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 
-import { getBookingsForDate } from "@/lib/booking";
 import { Callout } from "./Callout";
 
 type BookingModalProps = {
@@ -30,8 +29,25 @@ export function BookingModal({ date, onClose }: BookingModalProps) {
   const [remainingSlots, setRemainingSlots] = useState<number | null>(null);
 
   useEffect(() => {
-    const count = getBookingsForDate(format(date, "yyyy-MM-dd")).length;
-    setRemainingSlots(2 - count);
+    const loadRemainingSlots = async () => {
+      try {
+        const res = await fetch("/api/book");
+        const bookings = await res.json();
+
+        const targetDate = format(date, "yyyy-MM-dd");
+
+        const count = bookings.filter(
+          (b: { date: string }) => b.date && b.date.startsWith(targetDate)
+        ).length;
+
+        setRemainingSlots(2 - count);
+      } catch (err) {
+        console.error("Failed to load slots", err);
+        setRemainingSlots(null);
+      }
+    };
+
+    loadRemainingSlots();
   }, [date]);
 
   const submitBooking = async () => {
