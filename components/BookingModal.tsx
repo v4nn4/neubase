@@ -72,7 +72,7 @@ export function BookingModal({ date, onClose }: BookingModalProps) {
 
         {confirmed ? (
           <div className="text-green-600 font-medium">
-            ✅ Booking confirmed! We'll see you then.
+            ✅ Booking confirmed! We&apos;ll see you then.
           </div>
         ) : (
           <form
@@ -84,7 +84,8 @@ export function BookingModal({ date, onClose }: BookingModalProps) {
           >
             {remainingSlots === 1 && (
               <Callout variant="warning">
-                There's only 1 slot left for this date. Better book it quick!
+                There&apos;s only 1 slot left for this date. Better book it
+                quick!
               </Callout>
             )}
 
@@ -117,7 +118,7 @@ export function BookingModal({ date, onClose }: BookingModalProps) {
               type="submit"
               className="w-full"
             >
-              {loading ? "Booking…" : "Confirm Booking"}
+              {loading ? "Booking..." : "Confirm Booking"}
             </Button>
           </form>
         )}

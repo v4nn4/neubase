@@ -22,11 +22,11 @@ allBookings.forEach((b) => {
 });
 
 const lowAvailabilityDays = Array.from(dateCountMap.entries())
-  .filter(([_, count]) => count === 1)
+  .filter(([, count]) => count === 1)
   .map(([date]) => new Date(date));
 
 const bookedDays = Array.from(dateCountMap.entries())
-  .filter(([_, count]) => count >= 2)
+  .filter(([, count]) => count >= 2)
   .map(([date]) => new Date(date));
 
 export default function Home() {
