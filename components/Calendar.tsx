@@ -35,6 +35,7 @@ export function Calendar({
           lowAvailability:
             "bg-orange-100 text-orange-800 font-semibold rounded-full",
         }}
+        weekStartsOn={1}
       />
     </div>
   );
